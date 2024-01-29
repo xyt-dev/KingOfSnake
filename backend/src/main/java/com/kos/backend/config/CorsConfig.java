@@ -11,7 +11,6 @@ import java.io.IOException;
 
 // 在 Http 报头添加 "Access-Control-Allow-Origin" 等内容 从而允许 CORS(Cross Origin Resources Share) 允许跨域请求
 
-// 使用@Configuration注解表明这是一个配置类。
 @Configuration
 // 定义一个名为CorsConfig的类，它实现了Filter接口，用于拦截和处理传入的HTTP请求。
 public class CorsConfig implements Filter {
