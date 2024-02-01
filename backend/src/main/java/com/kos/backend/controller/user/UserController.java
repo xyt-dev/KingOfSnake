@@ -22,10 +22,10 @@ public class UserController {
         return userMapper.selectList(null);
     }
 
-//    @GetMapping("/user/account/register")
-//    public List<User> getTest() {
-//        return userMapper.selectList(null);
-//    }
+    @GetMapping("/user/account/register/")
+    public List<User> getTest() {
+        return userMapper.selectList(null);
+    }
 
     @GetMapping("/user/{userId}/")
     public User getuser(@PathVariable int userId) {
@@ -34,15 +34,16 @@ public class UserController {
         return userMapper.selectById(userId);
     }
 
-    @GetMapping("/user/add/{userId}/{username}/{password}/")
+    @GetMapping("/user/add/{userId}/{username}/{password}/{photoUrl}/")
     public String addUser(
             @PathVariable int userId,
             @PathVariable String username,
-            @PathVariable String password
+            @PathVariable String password,
+            @PathVariable String photoUrl
     ) {
         var encoder = new BCryptPasswordEncoder();
         var encodedPassword = encoder.encode(password);
-        User user = new User(userId, username, encodedPassword);
+        User user = new User(userId, username, encodedPassword, photoUrl);
         userMapper.insert(user);
         return "success" + user.toString();
     }

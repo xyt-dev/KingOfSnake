@@ -19,7 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 // 标记这个类为配置类，Spring容器将识别并使用它来配置应用程序。
 @EnableWebSecurity
-// 启用Spring Security的Web安全支持，并提供Spring MVC集成。
+// 用于启用 Spring Security 的 Web 安全支持。它主要用于启动 Spring Security 的核心组件，例如 SecurityContextHolder，AuthenticationManager，AccessDecisionManager 等
+// 若不添加该注解，将无法使用 Spring Security 提供的一些高级特性，例如自定义安全规则、自定义认证和授权策略等
 public class SecurityConfig {
     // 这是配置类的声明。
 
@@ -48,7 +49,7 @@ public class SecurityConfig {
             // 设置会话管理策略为无状态（STATELESS），因为使用token，所以不需要session。
 
             .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/user/account/token", "/user/account/register").permitAll()
+                .requestMatchers("/user/account/token/", "/user/account/register/").permitAll()
                 // 对于某些请求路径（如登录和注册）允许所有用户访问，不需要认证。
 
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
@@ -61,6 +62,6 @@ public class SecurityConfig {
         // 在UsernamePasswordAuthenticationFilter之前添加自定义的jwtAuthenticationTokenFilter。
 
         return http.build();
-        // 构建并返回SecurityFilterChain实例。
+        // 构建并返回SecurityFilterChain实例。(http 是继承了 AbstractSecurityBuilder<SecurityFilterChain> 的 HttpSecurity 实例)
     }
 }

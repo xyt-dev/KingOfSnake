@@ -27,14 +27,18 @@
         <!-- rightSide -->
         <ul class="navbar-nav">
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Link
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" v-if="$store.state.user.is_login">
+                {{ $store.state.user.username }}
+              </a>
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" v-else>
+                登录/注册
               </a>
               <ul class="dropdown-menu">
-                <li><router-link class="dropdown-item" :to="{name: 'HomeView'}">登录</router-link></li>
-                <li><router-link :class="routeName === 'UserBotIndexView' ? 'dropdown-item active' : 'dropdown-item'" :to="{name: 'UserBotIndexView'}">Bot</router-link></li>
+                <li v-if="!$store.state.user.is_login"><router-link class="dropdown-item" :to="{name: 'UserAccountLoginView'}">登录</router-link></li>
+                <li  v-if="$store.state.user.is_login"><router-link :class="routeName === 'UserBotIndexView' ? 'dropdown-item active' : 'dropdown-item'" :to="{name: 'UserBotIndexView'}">Bot</router-link></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><router-link class="dropdown-item" :to="{name: 'HomeView'}">注册</router-link></li>
+                <li v-if="!$store.state.user.is_login"><router-link class="dropdown-item" :to="{name: 'UserAccountRegisterView'}">注册账号</router-link></li>
+                <li v-if="$store.state.user.is_login"><a class="dropdown-item" @click="logout" role="button">退出登录</a></li>
               </ul>
             </li>
         </ul>
@@ -45,11 +49,19 @@
 </template>
 
 <script setup>
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
+import {useStore} from "vuex";
 import {computed} from "vue";
 const route = useRoute();
+const router = useRouter();
+const store = useStore();
 
 let routeName = computed(() => route.name);
+
+const logout = () => {
+  store.dispatch("logout");
+  router.push("/user/account/login/");
+}
 
 </script>
 

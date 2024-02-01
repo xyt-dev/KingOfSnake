@@ -19,7 +19,7 @@ public class JwtUtil {
     // JWT_TTL: "JWT Time To Live"，JWT的存活时间。
     public static final long JWT_TTL = 60 * 60 * 1000L * 24 * 14;
 
-    // 定义一个字符串常量JWT_KEY，用作生成JWT签名的密钥。
+    // 私钥，一定长度的字符串
     public static final String JWT_KEY = "SDFGjhdsfalshdfHFdsjkdsfds121232131baldfaced";
 
     // 生成一个去除"-"的UUID字符串作为JWT的唯一标识符。
@@ -28,9 +28,11 @@ public class JwtUtil {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    // 创建并返回一个JWT字符串。subject参数是JWT的主题（subject字段）。
+    // 创建并返回一个JWT字符串。(subject 可以是用户的 id)
     public static String createJWT(String subject) {
         JwtBuilder builder = getJwtBuilder(subject, null, getUUID());
+        // compact() 将 JWT 的不同部分（头部、有效负载、签名）加密压缩成一个紧凑的、URL安全的字符串表示形式。
+        // 这个字符串是 JWT 的最终形式，可以在网络上进行传输或存储。
         return builder.compact();
     }
 
@@ -59,7 +61,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setId(uuid)
                 .setSubject(subject)
-                .setIssuer("sg")
+                .setIssuer("哈哈哈")
                 .setIssuedAt(now)
                 .signWith(signatureAlgorithm, secretKey)
                 .setExpiration(expDate);
@@ -101,6 +103,6 @@ public class JwtUtil {
         // 如果签名验证失败（比如如果JWT被篡改过），这个方法会抛出异常。
 
         // .getBody(): 在JWT被成功解析并验证签名之后，这个方法用于获取JWT的主体（body），它通常包含了一系列的声明（Claims）。
-        // 这些声明是JWT的负载（payload），包括但不限于用户标识、权限、过期时间等信息。
+        // 这些 Claims 是JWT的负载（payload），包括但不限于用户标识、权限、过期时间等信息。
     }
 }

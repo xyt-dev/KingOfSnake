@@ -11,7 +11,7 @@ import java.util.Collection;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor // 在构造函数中初始化 user
 public class UserDetailsImpl implements UserDetails {
 
     private User user;
