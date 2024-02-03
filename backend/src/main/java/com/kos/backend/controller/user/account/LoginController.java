@@ -1,4 +1,4 @@
-package com.kos.backend.controller.user;
+package com.kos.backend.controller.user.account;
 
 import com.kos.backend.service.user.account.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;

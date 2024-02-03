@@ -1,4 +1,4 @@
-package com.kos.backend.controller.user;
+package com.kos.backend.controller.user.account;
 
 import com.kos.backend.service.impl.user.account.InfoServiceImpl;
 import com.kos.backend.service.user.account.InfoService;
