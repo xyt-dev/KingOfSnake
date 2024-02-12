@@ -152,7 +152,7 @@ const addBotForm = reactive({
 
 const updateBotForm = reactive({
 	bot_id: '',
-	title: '123',
+	title: '',
 	description: '',
 	content: '',
 	error_message: '',

@@ -7,8 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -41,7 +45,7 @@ public class SecurityConfig {
     // 定义一个Bean来获取AuthenticationManager。AuthenticationManager用于处理认证请求。
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.csrf(CsrfConfigurer::disable)
             // 禁用CSRF（跨站请求伪造）保护。由于使用token，不需要CSRF保护。
 
@@ -63,5 +67,10 @@ public class SecurityConfig {
 
         return http.build();
         // 构建并返回SecurityFilterChain实例。(http 是继承了 AbstractSecurityBuilder<SecurityFilterChain> 的 HttpSecurity 实例)
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return (web) -> web.ignoring().requestMatchers("/websocket/**");
     }
 }

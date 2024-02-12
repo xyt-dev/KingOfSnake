@@ -63,20 +63,12 @@ export class Snake extends GameObj {
         this.eyeDirection = d;
         this.nextCell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
 
-        if(!this.gamemap.checkNotHit(this.nextCell)) {
-            this.status = 'hit';
-            const color = this.color;
-            this.hitTimer = setInterval(() => {
-                if(this.color !== this.hitColor) {
-                    this.color = this.hitColor;
-                } else {
-                    this.color = color;
-                }
-                console.log('wow');
-            }, 100);
-            console.log("hit", "id: ", this.id);
-            return;
-        }
+        // if(!this.gamemap.checkNotHit(this.nextCell)) {
+        //     this.status = 'hit';
+        //     this.setHitTimer()
+        //     console.log("hit", "id: ", this.id);
+        //     return;
+        // }
 
         this.direction = -1; // 清空操作
         this.status = 'moving';
@@ -165,6 +157,18 @@ export class Snake extends GameObj {
             ctx.fillStyle = 'black';
             ctx.fill();
         }
+    }
+
+    setHitTimer() {
+        const color = this.color;
+        this.hitTimer = setInterval(() => {
+            if(this.color !== this.hitColor) {
+                this.color = this.hitColor;
+            } else {
+                this.color = color;
+            }
+            console.log('hitTimer');
+        }, 100);
     }
 
     deleteTimer() {

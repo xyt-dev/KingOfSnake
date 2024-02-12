@@ -10,14 +10,16 @@
 <script setup>
 import {GameMap} from "@/assets/scripts/GameMap.js";
 import {ref, onMounted, onBeforeUnmount} from "vue";
+import { useStore } from 'vuex';
 
 let parent = ref(null);
 let canvas = ref(null);
-// eslint-disable-next-line no-unused-vars
+const store = useStore();
 let gameMap = null;
 
 onMounted(() => {
-  gameMap = new GameMap(canvas.value.getContext('2d'), parent.value);
+  gameMap = new GameMap(canvas.value.getContext('2d'), parent.value, store);
+  store.commit("updateGameObject", gameMap);
 })
 
 onBeforeUnmount(() => {
