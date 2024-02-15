@@ -16,9 +16,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
 @ServerEndpoint("/websocket/{token}") // 注意不能以 / 结尾 (以 / 结尾表示目录，这里要表示端点，加 / 会导致异常)
@@ -59,7 +57,7 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         Integer userId = JwtAuthentication.getUserId(token);
         this.user = userMapper.selectById(userId);
         if(this.user != null) { // 用户存在，token 正确
-            userSocketMap.put(userId, this);
+            userSocketMap.put(userId, this); // 根据 userId 存放
             System.out.println("Connection opened: " + user);
         } else {
             this.session.close();
@@ -87,16 +85,26 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         Game game = new Game(21, 20, 50, user1.getId(), user2.getId());
         game.createMap();
 
-        userSocketMap.get(user1.getId()).game = game;
-        userSocketMap.get(user2.getId()).game = game;
+        // 线程安全的判断: if(userSocketMap.get(user1.getId()) != null) { userSocketMap.get(user1.getId()).game = game; }
+        // userSocketMap.get(user1.getId()).game.PlayerA.userId = user1.getId() .PlayerB.userId = user2.getId();
+        // userSocketMap.get(user2.getId()).game.PlayerA.userId = user1.getId() .PlayerB.userId = user2.getId();
+        // 也就是说 已匹配的 userSocket 中的 game 中 PlayerA 或 PlayerB 必有一个是该 userSocket 对应的 userId，另一个是对手的 userId
+        userSocketMap.computeIfPresent(user1.getId(), (key, value) -> {
+            value.game = game;
+            return value;
+        });
+        userSocketMap.computeIfPresent(user2.getId(), (key, value) -> {
+            value.game = game;
+            return value;
+        });
 
-        sendMatchingMessage(user1, user2, game);
-        sendMatchingMessage(user2, user1, game);
+        sendMatchingSuccessMessage(user1, user2, game);
+        sendMatchingSuccessMessage(user2, user1, game);
 
         game.start();
     }
 
-    private static void sendMatchingMessage(User user1, User user2, Game game) {
+    private static void sendMatchingSuccessMessage(User user1, User user2, Game game) {
         JSONObject resp = new JSONObject();
         resp.put("event", "match-success");
         resp.put("opponent_username", user2.getUsername());
@@ -110,7 +118,12 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         resp.put("b_id", game.getPlayerB().getId());
         resp.put("b_sx", game.getPlayerB().getSx());
         resp.put("b_sy", game.getPlayerB().getSy());
-        userSocketMap.get(user1.getId()).sendMessage(resp.toJSONString());
+
+        // 线程安全的判断
+        userSocketMap.computeIfPresent(user1.getId(), (key, value) -> {
+            value.sendMessage(resp.toJSONString());
+            return value;
+        });
     }
 
     private void startMatching() {
@@ -129,7 +142,7 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
     }
 
     private void move(Integer direction) {
-        if(game.getPlayerA().getId().equals(user.getId())) { // TODO ?
+        if(game.getPlayerA().getId().equals(user.getId())) {
             game.setNextStepA(direction);
         } else if(game.getPlayerB().getId().equals(user.getId())){
             game.setNextStepB(direction);

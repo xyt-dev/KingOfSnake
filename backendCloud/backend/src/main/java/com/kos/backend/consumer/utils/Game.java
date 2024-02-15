@@ -179,8 +179,15 @@ public class Game extends Thread {
     }
 
     private void sendMessage2Both(String message) {
-        WebSocketServer.userSocketMap.get(playerA.getId()).sendMessage(message);
-        WebSocketServer.userSocketMap.get(playerB.getId()).sendMessage(message);
+        // 防止在 get socket 时玩家正好掉线(computeIfPresent 是线程安全的判断)
+        WebSocketServer.userSocketMap.computeIfPresent(playerA.getId(), (key, value) -> {
+            value.sendMessage(message);
+            return value;
+        });
+        WebSocketServer.userSocketMap.computeIfPresent(playerB.getId(), (key, value) -> {
+            value.sendMessage(message);
+            return value;
+        });
     }
 
     private void sendMove() { // 向两个Client传递移动信息
