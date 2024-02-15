@@ -19,6 +19,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 // 标记这个类为配置类，Spring容器将识别并使用它来配置应用程序。
@@ -46,6 +51,27 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+
+        // 指定允许的IP地址
+        List<String> allowedIps = Arrays.asList("127.0.0.1", "192.168.31.157");
+        // 指定允许的URL路径
+        String[] allowedUrls = {"/pk/start/game/", "/error"}; // 注意加 “/error" 让Spring Security不拦截错误页面
+
+        RequestMatcher customMatcher = request -> {
+            boolean ipMatch = allowedIps.stream().anyMatch(ip -> new IpAddressMatcher(ip).matches(request));
+            if (!ipMatch) {
+                return false;
+            }
+            String requestUrl = request.getRequestURI();
+            // 检查请求的URL是否为允许的路径之一
+            for (String url : allowedUrls) {
+                if (requestUrl.startsWith(url)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         http.csrf(CsrfConfigurer::disable)
             // 禁用CSRF（跨站请求伪造）保护。由于使用token，不需要CSRF保护。
 
@@ -55,10 +81,10 @@ public class SecurityConfig {
             .authorizeHttpRequests((authz) -> authz
                 .requestMatchers("/user/account/token/", "/user/account/register/").permitAll()
                 // 对于某些请求路径（如登录和注册）允许所有用户访问，不需要认证。
-
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 // 允许所有预检（OPTIONS）请求，这常用于CORS（跨源资源共享）中。
-
+                .requestMatchers(customMatcher).permitAll()
+                // 使用自定义RequestMatcher
                 .anyRequest().authenticated()
                 // 要求除了上述明确允许的请求外，所有其他请求都需要认证。
             )

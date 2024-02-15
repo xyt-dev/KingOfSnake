@@ -66,7 +66,7 @@ public class UpdateBotServiceImpl implements UpdateBotService {
         }
 
         Date now = new Date();
-        Bot updatedBot = new Bot(bot.getId(), user.getId(), title, description, content, bot.getRating(), bot.getCreateTime(), now);
+        Bot updatedBot = new Bot(bot.getId(), user.getId(), title, description, content, bot.getCreateTime(), now);
 
         botMapper.updateById(updatedBot);
         map.put("message", "success");

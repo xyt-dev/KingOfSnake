@@ -5,10 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 // 用于启用 Spring Security 的 Web 安全支持。它主要用于启动 Spring Security 的核心组件，例如 SecurityContextHolder，AuthenticationManager，AccessDecisionManager 等
@@ -17,15 +20,19 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        RequestMatcher ipMatcher = new IpAddressMatcher("127.0.0.1"); // 允许访问的IP地址
+        // 指定允许的IP地址
+        List<String> allowedIps = Arrays.asList("127.0.0.1", "192.168.31.157");
+        // 指定允许的URL路径
+        String[] allowedUrls = {"/player/add/", "/player/remove/", "/error"}; // 注意加 “/error" 让Spring Security不拦截错误页面
 
         RequestMatcher customMatcher = request -> {
-            if (!ipMatcher.matches(request)) {
+            System.out.println("IP: " + request.getRemoteAddr() + "\nURL: " + request.getRequestURI());
+            boolean ipMatch = allowedIps.stream().anyMatch(ip -> new IpAddressMatcher(ip).matches(request));
+            if (!ipMatch) {
+                System.out.println("IP not allowed");
                 return false; // 如果IP地址不匹配，则直接拒绝
             }
 
-            // 指定允许的URL路径
-            String[] allowedUrls = {"/player/add/", "/player/remove", "/error"}; // 注意加 “/error" 让Spring Security不拦截错误页面
             String requestUrl = request.getRequestURI();
 
             // 检查请求的URL是否为允许的路径之一
@@ -35,10 +42,12 @@ public class SecurityConfig {
                 }
             }
 
+            System.out.println("Not allowed");
             return false; // 如果不是指定的路径，拒绝访问
         };
 
-        http.authorizeHttpRequests(authorize -> authorize
+        http.csrf(CsrfConfigurer::disable) // 必须加这个，否则后端无法访问
+                .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.OPTIONS).permitAll() // 允许所有预检（OPTIONS）请求
                 .requestMatchers(customMatcher).permitAll() // 使用自定义RequestMatcher
                 .anyRequest().authenticated() // 其他所有请求都需要认证

@@ -19,7 +19,6 @@ public class Bot {
     private String title;
     private String description;
     private String content;
-    private Integer rating;
     // 读取和写入时转换时间格式 (Java的Date对象默认被序列化为一个包含时区信息的ISO 8601格式的字符串，如2023-07-09T13:07:09.000+0000)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
