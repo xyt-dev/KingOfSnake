@@ -17,9 +17,16 @@ export class GameMap extends GameObj {
         this.walls = [];
         this.createWalls();
 
+        if(store.state.pk.role === "A") { // A 的颜色是蓝色，B 的颜色是红色
+            this.snake1Color = '#5076EC';
+            this.snake2Color = '#F95050';
+        } else {
+            this.snake1Color = '#F95050';
+            this.snake2Color = '#5076EC';
+        }
         this.snakes = [ // 初始化蛇
-            new Snake({id: 0, color: '#5076EC', r: this.rows - 2, c: 1}, this ),
-            new Snake({id: 1, color: '#F95050', r: 1, c: this.cols - 2}, this )
+            new Snake({id: 0, color: this.snake1Color, r: this.rows - 2, c: 1}, this ),
+            new Snake({id: 1, color: this.snake2Color, r: 1, c: this.cols - 2}, this )
         ]
 
     }

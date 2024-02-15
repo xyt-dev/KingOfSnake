@@ -41,7 +41,7 @@ onMounted(() => {
                 photo: data.opponent_photo,
             })
 			setTimeout(() => {
-				store.commit("updateStatus", "playing");
+				store.commit("updateStatus", "playing"); // GameMap 会自动创建挂载
 			}, 1000);
 			store.commit("updateGame", data);
         } else if (data.event === "move") {

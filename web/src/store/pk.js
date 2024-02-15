@@ -14,6 +14,7 @@ export default {
         b_id: 0,
         b_sx: 0,
         b_sy: 0,
+        role: "",
         gameObject: null,
         result: "none", // none D A B
     },
@@ -41,6 +42,7 @@ export default {
             state.b_id = data.b_id;
             state.b_sx = data.b_sx;
             state.b_sy = data.b_sy;
+            state.role = data.role;
             // console.log("updateGameMap:", data)
         },
         updateGameObject(state, gameObject) {
