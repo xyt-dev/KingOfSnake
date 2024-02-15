@@ -16,6 +16,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -118,8 +119,14 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         resp.put("b_id", game.getPlayerB().getId());
         resp.put("b_sx", game.getPlayerB().getSx());
         resp.put("b_sy", game.getPlayerB().getSy());
+        if (user1.getId().equals(game.getPlayerA().getId()) ) {
+            resp.put("role", "A");
+        } else {
+            resp.put("role", "B");
+        }
 
         // 线程安全的判断
+        // 发送给参数中的 user1
         userSocketMap.computeIfPresent(user1.getId(), (key, value) -> {
             value.sendMessage(resp.toJSONString());
             return value;
