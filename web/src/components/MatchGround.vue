@@ -1,6 +1,19 @@
 <template>
 	<div class="outer">
 		<div class="matchground voltage">
+            <el-row>
+                <div class="dropdown">
+                    <el-cascader
+                        class="dropdown"
+                        placeholder="选择出战"
+                        style="color:white"
+                        :options="options"
+                        v-model="value"
+                        size="large"
+                        :disabled="!canSelect"
+                    />
+                </div>
+            </el-row>
 			<el-row>
 				<el-col :span="12">
 					<div class="user-photo">
@@ -51,15 +64,47 @@
 <script setup>
 import {onMounted, onUnmounted, ref} from "vue";
 import { useStore } from "vuex";
+import $ from "jquery";
 
 const store = useStore();
 let isAnimating = ref(false);
 let matchInfo = ref("开始匹配");
 const svg = ref(null);
 
+const bots = ref(null);
+const options = ref([
+	{
+        value: -1,
+		label: '亲自出马',
+    },
+]);
+const value = ref([-1]); // 默认是"亲自出马"
+const canSelect = ref(true);
+$.ajax({
+	url: `http://${localStorage.getItem('IpAddr')}:3000/user/bot/getlist/`,
+	type: "get",
+	headers: {
+		Authorization: "Bearer " + store.state.user.token,
+	},
+	success(resp) {
+		bots.value = resp;
+		for (let i = 0; i < resp.length; i++) {
+			options.value.push({
+				value: resp[i].id,
+                label: resp[i].title,
+			})
+		}
+		console.log("getBotList success: ", options.value);
+	},
+	error(err) {
+		console.log("getBotList err: ", err);
+	}
+});
+
 onMounted(() => {
     svg.value = document.querySelector('.voltage svg');
 });
+
 onUnmounted(() => {
 	svg.value.style.opacity = '';
 });
@@ -70,7 +115,10 @@ const clickMatchButton = () => {
 		svg.value.style.opacity = 1;
 		store.state.pk.socket.send(JSON.stringify({
             event: "start-matching",
+            bot_id: value.value[0],
         }))
+        canSelect.value = false;
+		console.log(value.value[0]);
     } else {
         matchInfo.value = "开始匹配";
 		svg.value.style.opacity = '';
@@ -78,10 +126,12 @@ const clickMatchButton = () => {
 		store.state.pk.socket.send(JSON.stringify({
 			event: "stop-matching",
 		}))
+        canSelect.value = true;
     }
 }
 
 </script>
+
 
 <style scoped>
 
@@ -101,7 +151,7 @@ background-color: rgba(50, 50, 50, 0.3);
 }
 
 div.user-photo {
-	margin-top: 200px;
+	margin-top: 50px;
 	text-align: center;
 }
 
@@ -156,49 +206,6 @@ div.begin-button {
 	opacity: 0;
 	transition: opacity 0.3s;
 	transition-delay: 0.4s;
-}
-
-.voltage .dots .dot {
-	width: 1rem;
-	height: 1rem;
-	background: white;
-	border-radius: 100%;
-	position: absolute;
-	opacity: 0;
-}
-
-.voltage .dots .dot-1 {
-	top: 0;
-	left: 20%;
-	animation: fly-up 3s linear infinite;
-}
-
-.voltage .dots .dot-2 {
-	top: 0;
-	left: 55%;
-	animation: fly-up 3s linear infinite;
-	animation-delay: 0.5s;
-}
-
-.voltage .dots .dot-3 {
-	top: 0;
-	left: 80%;
-	animation: fly-up 3s linear infinite;
-	animation-delay: 1s;
-}
-
-.voltage .dots .dot-4 {
-	bottom: 0;
-	left: 30%;
-	animation: fly-down 3s linear infinite;
-	animation-delay: 2.5s;
-}
-
-.voltage .dots .dot-5 {
-	bottom: 0;
-	left: 65%;
-	animation: fly-down 3s linear infinite;
-	animation-delay: 1.5s;
 }
 
 @keyframes spark-1 {
@@ -306,4 +313,17 @@ div.begin-button {
 .clean-btn:active {
     background: linear-gradient(32deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
 }
+
+.dropdown {
+    margin: 100px auto auto;
+}
+
+.dropdown >>> .el-input__wrapper {
+    background-color: transparent;
+}
+
+.dropdown >>> .el-cascader .el-input .el-input__inner {
+    color: white;
+}
+
 </style>

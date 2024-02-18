@@ -126,7 +126,6 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-c_cpp';
 
 
-
 ace.config.set(
 		"basePath",
 		"https://cdn.jsdelivr.net/npm/ace-builds@" +
@@ -178,7 +177,7 @@ const clearForm = (form) => {
 const refreshList = () => {
 	tableData.value = [];
 	$.ajax({
-		url: "http://127.0.0.1:3000/user/bot/getlist/",
+		url: `http://${localStorage.getItem('IpAddr')}:3000/user/bot/getlist/`,
 		type: "get",
 		headers: {
 			Authorization: "Bearer " + store.state.user.token,
@@ -206,7 +205,7 @@ const refreshList = () => {
 const addBot = () => {
 	addBotForm.error_message = '';
 	$.ajax({
-		url: "http://127.0.0.1:3000/user/bot/add/",
+		url: `http://${localStorage.getItem('IpAddr')}:3000/user/bot/add/`,
 		type: "post",
 		data: {
 			title: addBotForm.title,
@@ -234,7 +233,7 @@ const addBot = () => {
 
 const removeBot = (row) => {
 	$.ajax({
-		url: "http://127.0.0.1:3000/user/bot/remove/",
+		url: `http://${localStorage.getItem('IpAddr')}:3000/user/bot/remove/`,
 		type: "post",
 		data: {
 			bot_id: row.bot_id,
@@ -255,7 +254,7 @@ const removeBot = (row) => {
 
 const updateBot = () => {
 		$.ajax({
-			url: "http://127.0.0.1:3000/user/bot/update/",
+			url: `http://${localStorage.getItem('IpAddr')}:3000/user/bot/update/`,
 			type: "post",
 			data: {
 				bot_id: updateBotForm.bot_id,

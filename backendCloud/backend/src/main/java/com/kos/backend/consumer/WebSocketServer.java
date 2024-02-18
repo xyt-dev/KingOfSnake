@@ -3,8 +3,10 @@ package com.kos.backend.consumer;
 import com.alibaba.fastjson.JSONObject;
 import com.kos.backend.consumer.utils.Game;
 import com.kos.backend.consumer.utils.JwtAuthentication;
+import com.kos.backend.mapper.BotMapper;
 import com.kos.backend.mapper.RecordMapper;
 import com.kos.backend.mapper.UserMapper;
+import com.kos.backend.pojo.Bot;
 import com.kos.backend.pojo.User;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -16,7 +18,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -25,12 +26,13 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
     // CopyOnWriteArraySet 是一个线程安全的集合，采用写时复制，写完替换原有数据(替换操作是原子的)，适用于读多写少的场景
     public static final ConcurrentHashMap<Integer, WebSocketServer> userSocketMap = new ConcurrentHashMap<>(); // 线程安全的 HashMap
     private static UserMapper userMapper;
+    private static BotMapper botMapper;
     public static RecordMapper recordMapper;
-    private static RestTemplate restTemplate;
+    public static RestTemplate restTemplate;
 
     private User user;
     private Session session = null;
-    private Game game = null;
+    public Game game = null;
 
     private final static String addPlayerUrl = "http://127.0.0.1:3001/player/add/";
     private final static String removePlayerUrl = "http://127.0.0.1:3001/player/remove/";
@@ -48,6 +50,11 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         WebSocketServer.restTemplate = restTemplate;
+    }
+
+    @Autowired
+    public void setBotMapper(BotMapper botMapper) {
+        WebSocketServer.botMapper = botMapper;
     }
 
     // WebSocket连接打开时，WebSocket API会创建一个新的session对象，并自动传递给@OnOpen注解的方法。
@@ -74,16 +81,18 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         }
     }
 
-    public static void startGame(Integer user1Id, Integer user2Id) {
+    public static void startGame(Integer user1Id, Integer user1BotId, Integer user2Id, Integer user2BotId) {
         User user1 = userMapper.selectById(user1Id);
         User user2 = userMapper.selectById(user2Id);
+        Bot bot1 = botMapper.selectById(user1BotId); // 人工操作时 BotId 为 -1 取得 null
+        Bot bot2 = botMapper.selectById(user2BotId);
 
         if(user1 == null || user2 == null) {
             System.out.println("user not found: " + user1Id + " " + user2Id);
             return;
         }
 
-        Game game = new Game(21, 20, 50, user1.getId(), user2.getId());
+        Game game = new Game(21, 20, 50, user1.getId(), bot1, user2.getId(), bot2);
         game.createMap();
 
         // 线程安全的判断: if(userSocketMap.get(user1.getId()) != null) { userSocketMap.get(user1.getId()).game = game; }
@@ -133,10 +142,11 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         });
     }
 
-    private void startMatching() {
+    private void startMatching(Integer botId) {
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user_id", user.getId().toString());
         data.add("rating", user.getRating().toString());
+        data.add("bot_id", botId.toString());
         System.out.println(data);
         restTemplate.postForObject(addPlayerUrl, data, String.class);
     }
@@ -150,9 +160,11 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
 
     private void move(Integer direction) {
         if(game.getPlayerA().getId().equals(user.getId())) {
-            game.setNextStepA(direction);
+            if (game.getPlayerA().getBotId().equals(-1)) // 人工操作
+                game.setNextStepA(direction);
         } else if(game.getPlayerB().getId().equals(user.getId())){
-            game.setNextStepB(direction);
+            if (game.getPlayerB().getBotId().equals(-1)) // 人工操作
+                game.setNextStepB(direction);
         }
     }
 
@@ -162,7 +174,7 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
         JSONObject data = JSONObject.parseObject(message);
         String event = data.getString("event");
         if("start-matching".equals(event)) {
-            startMatching();
+            startMatching(data.getInteger("bot_id"));
         } else if ("stop-matching".equals(event)) {
             stopMatching();
         } else if ("move".equals(event)) {

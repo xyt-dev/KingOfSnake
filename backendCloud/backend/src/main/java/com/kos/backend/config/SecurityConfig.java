@@ -55,7 +55,7 @@ public class SecurityConfig {
         // 指定允许的IP地址
         List<String> allowedIps = Arrays.asList("127.0.0.1", "192.168.31.157");
         // 指定允许的URL路径
-        String[] allowedUrls = {"/pk/start/game/", "/error"}; // 注意加 “/error" 让Spring Security不拦截错误页面
+        String[] allowedUrls = {"/pk/start/game/", "/pk/receive/bot/nextmove/", "/error"}; // 注意加 “/error" 让Spring Security不拦截错误页面
 
         RequestMatcher customMatcher = request -> {
             boolean ipMatch = allowedIps.stream().anyMatch(ip -> new IpAddressMatcher(ip).matches(request));

@@ -2,9 +2,13 @@ package com.kos.backend.consumer.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kos.backend.consumer.WebSocketServer;
+import com.kos.backend.pojo.Bot;
 import com.kos.backend.pojo.Record;
 import lombok.Getter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.net.http.WebSocket;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +31,7 @@ public class Game extends Thread {
     private final Player playerA;
     @Getter
     private final Player playerB;
+    private final Integer WAITTIME = 10;
 
     private Integer nextStepA = null;
     private Integer nextStepB = null;
@@ -34,6 +39,8 @@ public class Game extends Thread {
     private final ReentrantLock lock = new ReentrantLock();
     private String status = "playing"; // playing -> finished
     private String gameResult = "D"; // D: 平局 |  A: 玩家A撞  |  B: 玩家B撞
+
+    private final static String addBotUrl = "http://127.0.0.1:3002/bot/add/";
 
     public void setNextStepA(Integer nextStepA) {
         lock.lock();
@@ -53,13 +60,24 @@ public class Game extends Thread {
         }
     }
 
-    public Game(Integer rows, Integer cols, Integer innerWallsCount, Integer idA, Integer idB) {
+    public Game(Integer rows, Integer cols, Integer innerWallsCount, Integer idA, Bot botA, Integer idB, Bot botB) {
         this.rows = rows;
         this.cols = cols;
         this.innerWallsCount = innerWallsCount;
         this.g = new int[rows][cols];
-        playerA = new Player(idA, rows - 2, 1, new ArrayList<>()); // a
-        playerB = new Player(idB, 1, cols - 2, new ArrayList<>()); // b
+
+        Integer botIdA = -1, botIdB = -1;
+        String botCodeA = "", botCodeB = "";
+        if(botA != null) {
+            botIdA = botA.getId();
+            botCodeA = botA.getContent();
+        }
+        if(botB != null) {
+            botIdB = botB.getId();
+            botCodeB = botB.getContent();
+        }
+        playerA = new Player(idA, botIdA, botCodeA, rows - 2, 1, new ArrayList<>()); // a
+        playerB = new Player(idB, botIdB, botCodeB, 1, cols - 2, new ArrayList<>()); // b
     }
 
     private boolean checkConnectivity(int sx, int sy, int tx, int ty) {
@@ -121,13 +139,46 @@ public class Game extends Thread {
         }
     }
 
+    private String getInput(Player player) { // 将当前局面信息编码为 String
+        // map#self.Sx#self.Sy#self.operations#opponent.Sx#opponent.Sy#opponent.operations
+        Player self, opponent;
+        if (playerA.getId().equals(player.getId())) {
+            self = playerA;
+            opponent = playerB;
+        } else {
+            self = playerB;
+            opponent = playerA;
+        }
+        return getGameMapString() + "#" + self.getSx() + "#" + self.getSy() + "#" + "(" + self.getStepsString() + ")"
+                + "#" + opponent.getSx() + "#" + opponent.getSy() + "#" + "(" + opponent.getStepsString() + ")";
+    }
+
+    private void sendBotCode(Player player) {
+        if (player.getBotId() == -1) return; // 不需要执行代码
+
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", player.getId().toString());
+        data.add("bot_code", player.getBotCode());
+        data.add("input", getInput(player));
+        System.out.println("send botInfo: " + data);
+        try {
+            WebSocketServer.restTemplate.postForObject(addBotUrl, data, String.class);
+        } catch (Exception e) {
+            System.out.println("sendBotCode exception: " + e.getMessage());
+        }
+    }
+
     private boolean nextStep() {
         try {
             Thread.sleep(200); // 防止发送过快前端动画未执行完
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        for (int i = 0; i < 100; i ++ ) { // 10 秒内需要获取到输入
+
+        sendBotCode(playerA);
+        sendBotCode(playerB);
+
+        for (int i = 0; i < WAITTIME * 10; i ++ ) { // 10 秒内需要获取到输入
             try {
                 Thread.sleep(100); // 最大操作延迟: 100ms
                 lock.lock();
@@ -242,7 +293,12 @@ public class Game extends Thread {
     }
 
     @Override
-    public void run() { // TODO 逻辑
+    public void run() {
+        try {
+            Thread.sleep(2000); // 等待前端进入界面
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         for(int i = 0; i < 2000; ++ i) {
             if(nextStep()) { // 是否获取到两条蛇的下一步操作
                 judge();

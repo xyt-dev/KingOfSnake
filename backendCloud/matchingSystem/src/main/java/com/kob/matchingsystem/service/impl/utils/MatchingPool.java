@@ -24,7 +24,7 @@ public class MatchingPool extends Thread {
         MatchingPool.restTemplate = restTemplate;
     }
 
-    public void addPlayer(Integer userId, Integer rating) {
+    public void addPlayer(Integer userId, Integer rating, Integer botId) {
         lock.lock();
         try {
             // 不重复才添加
@@ -33,7 +33,7 @@ public class MatchingPool extends Thread {
                     return;
                 }
             }
-            players.add(new Player(userId, rating, 0));
+            players.add(new Player(userId, rating, botId, 0));
         } finally {
             lock.unlock();
         }
@@ -62,7 +62,9 @@ public class MatchingPool extends Thread {
     private void sendResult(Player a, Player b) { // 发送匹配结果 TODO
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user1_id", a.getUserId().toString());
+        data.add("user1_bot_id", a.getBotId().toString());
         data.add("user2_id", b.getUserId().toString());
+        data.add("user2_bot_id", b.getBotId().toString());
         restTemplate.postForObject(startGameUrl, data, String.class);
     }
 
