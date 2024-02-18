@@ -107,9 +107,10 @@ onMounted(() => {
 
 onUnmounted(() => {
 	svg.value.style.opacity = '';
+	store.commit("updateButtonStatus", "still");
 });
 const clickMatchButton = () => {
-	if(matchInfo.value === "开始匹配") {
+	if(store.state.pk.button_status === "still") {
         matchInfo.value = "匹配中...";
 		isAnimating.value = true;
 		svg.value.style.opacity = 1;
@@ -118,7 +119,7 @@ const clickMatchButton = () => {
             bot_id: value.value[0],
         }))
         canSelect.value = false;
-		console.log(value.value[0]);
+		store.commit("updateButtonStatus", "matching");
     } else {
         matchInfo.value = "开始匹配";
 		svg.value.style.opacity = '';
@@ -127,6 +128,7 @@ const clickMatchButton = () => {
 			event: "stop-matching",
 		}))
         canSelect.value = true;
+		store.commit("updateButtonStatus", "still");
     }
 }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kos.backend.consumer.WebSocketServer;
 import com.kos.backend.pojo.Bot;
 import com.kos.backend.pojo.Record;
+import com.kos.backend.pojo.User;
 import lombok.Getter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -265,7 +266,38 @@ public class Game extends Thread {
         return res.toString();
     }
 
+    private void updateUserRating(Player player, Integer rating) {
+        User user = WebSocketServer.userMapper.selectById(player.getId());
+        user.setRating(rating);
+        WebSocketServer.userMapper.updateById(user);
+    }
+
     private void saveToDataBase() {
+        // 更新排位分
+        Integer ratingA = WebSocketServer.userMapper.selectById(playerA.getId()).getRating();
+        Integer ratingB = WebSocketServer.userMapper.selectById(playerB.getId()).getRating();
+
+        final int MAXDIFF = 200;
+        final int MINDIFF = 20;
+        final int K = 10;
+        final int BASE = 100;
+
+        int diff = Math.abs(ratingA - ratingB) / K;
+        if("A".equals(gameResult)) {
+            if(ratingA >= ratingB) diff = Math.min(BASE + diff, MAXDIFF);
+            else diff = Math.max(MINDIFF, BASE - diff);
+            ratingA -= diff;
+            ratingB += diff;
+        } else if("B".equals(gameResult)) {
+            if(ratingB >= ratingA) diff = Math.min(BASE + diff, MAXDIFF);
+            else diff = Math.max(MINDIFF, BASE - diff);
+            ratingA += diff;
+            ratingB -= diff;
+        }
+        System.out.println("diff: " + diff + " ratingA: " + ratingA + " ratingB: " + ratingB);
+        updateUserRating(playerA, ratingA);
+        updateUserRating(playerB, ratingB);
+
         Record record = new Record(
             null,
             playerA.getId(),
@@ -280,7 +312,6 @@ public class Game extends Thread {
             gameResult,
             new Date()
         );
-
         WebSocketServer.recordMapper.insert(record);
     }
 

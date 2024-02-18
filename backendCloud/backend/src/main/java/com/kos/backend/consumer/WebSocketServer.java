@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对象和一个线程
     // CopyOnWriteArraySet 是一个线程安全的集合，采用写时复制，写完替换原有数据(替换操作是原子的)，适用于读多写少的场景
     public static final ConcurrentHashMap<Integer, WebSocketServer> userSocketMap = new ConcurrentHashMap<>(); // 线程安全的 HashMap
-    private static UserMapper userMapper;
-    private static BotMapper botMapper;
+    public static UserMapper userMapper;
+    public static BotMapper botMapper;
     public static RecordMapper recordMapper;
     public static RestTemplate restTemplate;
 

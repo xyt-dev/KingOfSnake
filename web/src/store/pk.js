@@ -2,6 +2,7 @@
 export default {
     state: {
         status: "matching", // matching: 匹配界面, playing: 对战界面
+        button_status: "still",
         socket: null,
         opponent_username: "",
         opponent_photo: "",
@@ -31,6 +32,9 @@ export default {
         },
         updateStatus(state, status) {
             state.status = status;
+        },
+        updateButtonStatus(state, status) {
+            state.button_status = status
         },
         updateGame(state, data) {
             state.gamemap = data.gamemap;

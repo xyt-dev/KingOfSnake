@@ -25,6 +25,7 @@ onMounted(() => {
 	store.commit("updateResult", "none");
 
 	// 创建一个新的 WebSocket 对象时，浏览器会自动尝试与提供的 URL 建立一个 WebSocket 连接，这个过程是异步的
+    // 注: 由于后端根据 userId 来选择 WebSocket，所以关闭后重新连接，后端也会把信息发送到新的 WebSocket 上
 	socket = new WebSocket(socketUrl);
 
 	socket.onopen = () => {
@@ -35,7 +36,7 @@ onMounted(() => {
 	socket.onmessage = msg => {
 		const data = JSON.parse(msg.data);
 		console.log("game message:", data);
-		if (data.event === "match-success") { // 匹配成功
+		if (data.event === "match-success" && store.state.pk.button_status === "matching") { // 匹配成功
 			store.commit("updateOpponent", {
 				username: data.opponent_username,
                 photo: data.opponent_photo,
@@ -44,12 +45,12 @@ onMounted(() => {
 				store.commit("updateStatus", "playing"); // GameMap 会自动创建挂载
 			}, 1000);
 			store.commit("updateGame", data);
-        } else if (data.event === "move") {
+        } else if (data.event === "move" && store.state.pk.status === "playing") {
             const game = store.state.pk.gameObject;
 			const [snake0, snake1] = game.snakes;
 			snake0.setDirection(data.a_direction); // a -> snake0
 			snake1.setDirection(data.b_direction); // b -> snake1
-        } else if (data.event === "result") {
+        } else if (data.event === "result" && store.state.pk.status === "playing") {
             const game = store.state.pk.gameObject;
 			const [snake0, snake1] = game.snakes;
 			if (data.result === "A" || data.result === "D") {
