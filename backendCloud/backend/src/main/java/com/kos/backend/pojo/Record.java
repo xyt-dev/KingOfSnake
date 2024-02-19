@@ -25,6 +25,9 @@ public class Record {
     private String bSteps;
     private String map;
     private String result;
+    private Integer aRating;
+    private Integer bRating;
+    private Integer diff;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 }

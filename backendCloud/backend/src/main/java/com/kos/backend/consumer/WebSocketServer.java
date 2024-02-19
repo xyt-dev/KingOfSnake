@@ -11,6 +11,7 @@ import com.kos.backend.pojo.User;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -30,6 +31,7 @@ public class WebSocketServer { // 一个连接对应一个 WebSocketServer 对�
     public static RecordMapper recordMapper;
     public static RestTemplate restTemplate;
 
+    @Getter
     private User user;
     private Session session = null;
     public Game game = null;

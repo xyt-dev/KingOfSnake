@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MatchingPool extends Thread {
     private static List<Player> players = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
-    private static final int SCALING_FACTOR = 100; // 等待因子
+    private static final int SCALING_FACTOR = 200; // 等待因子
 
     private static RestTemplate restTemplate;
     private final static String startGameUrl = "http://127.0.0.1:3000/pk/start/game/";

@@ -293,8 +293,9 @@ public class Game extends Thread {
             else diff = Math.max(MINDIFF, BASE - diff);
             ratingA += diff;
             ratingB -= diff;
+        } else if("D".equals(gameResult)) {
+            diff = 0;
         }
-        System.out.println("diff: " + diff + " ratingA: " + ratingA + " ratingB: " + ratingB);
         updateUserRating(playerA, ratingA);
         updateUserRating(playerB, ratingB);
 
@@ -310,9 +311,16 @@ public class Game extends Thread {
             playerB.getStepsString(),
             getGameMapString(),
             gameResult,
+            ratingA,
+            ratingB,
+            diff,
             new Date()
         );
         WebSocketServer.recordMapper.insert(record);
+
+        // 动态更新排位分
+        WebSocketServer.userSocketMap.get(playerA.getId()).getUser().setRating(ratingA);
+        WebSocketServer.userSocketMap.get(playerB.getId()).getUser().setRating(ratingB);
     }
 
     private void sendResult() {
