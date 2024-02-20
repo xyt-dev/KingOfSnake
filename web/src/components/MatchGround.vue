@@ -139,9 +139,6 @@ const clickMatchButton = () => {
 
 .outer {
 	position: absolute;
-	background-image: url('@/assets/images/Cyberpunk.png');
-	background-position: center;
-	background-size: cover;
 	height: 100vh;
 	width: 100vw;
 }

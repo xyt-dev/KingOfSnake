@@ -79,7 +79,7 @@ public class SecurityConfig {
             // 设置会话管理策略为无状态（STATELESS），因为使用token，所以不需要session。
 
             .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/user/account/token/", "/user/account/register/").permitAll()
+                .requestMatchers("/user/account/token/", "/user/account/register/", "/user/account/avatar/**").permitAll()
                 // 对于某些请求路径（如登录和注册）允许所有用户访问，不需要认证。
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 // 允许所有预检（OPTIONS）请求，这常用于CORS（跨源资源共享）中。

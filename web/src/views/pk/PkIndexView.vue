@@ -1,7 +1,9 @@
 <template>
-    <PlayGround v-if="$store.state.pk.status === 'playing'"/>
-    <MatchGround v-if="$store.state.pk.status === 'matching'"/>
-    <ResultBoard v-if="$store.state.pk.result !== 'none'"></ResultBoard>
+    <div class="outer">
+        <PlayGround v-if="$store.state.pk.status === 'playing'"/>
+        <MatchGround v-if="$store.state.pk.status === 'matching'"/>
+        <ResultBoard v-if="$store.state.pk.result !== 'none'"></ResultBoard>
+    </div>
 </template>
 
 <script setup>
@@ -80,5 +82,13 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.outer {
+    position: absolute;
+    background-image: url('@/assets/images/Cyberpunk.png');
+    background-position: center;
+    background-size: cover;
+    height: 100vh;
+    width: 100vw;
+}
 
 </style>

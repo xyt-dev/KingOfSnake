@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.management.QueryEval;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +70,10 @@ public class RegisterServiceImpl implements RegisterService {
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        String photo = "https://cdn77-pic.xvideos-cdn.com/videos/thumbs169l/6c/75/1e/6c751ed3fc0d8f5de092f4a476ade014-1/" +
-                "6c751ed3fc0d8f5de092f4a476ade014.23.jpg";
+
+        String serverAddr = "http://192.168.31.157:3000"; // TODO
+        String photo = serverAddr + "/user/account/avatar/default.png";
+        System.out.println(photo);
         User user = new User(null, username, encodedPassword, 1500, photo);
         userMapper.insert(user);
 

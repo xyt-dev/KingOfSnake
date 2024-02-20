@@ -2,10 +2,9 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-3">
-				<div class="card" style="margin-top:20px">
-					<div class="card-body">
-						<img :src="$store.state.user.photo" style="width:100%" alt="Avatar">
-					</div>
+				<div style="margin-top:20px; align-items: center; height: 200px;">
+<!--						<img :src="$store.state.user.photo" style="width:100%" alt="Avatar">-->
+                        <PhotoUploader/>
 				</div>
 			</div>
 			<div class="col-9">
@@ -134,6 +133,7 @@ ace.config.set(
 
 
 import { reactive } from 'vue'
+import PhotoUploader from "@/components/PhotoUploader.vue";
 const store = useStore();
 let bots = ref([]);
 

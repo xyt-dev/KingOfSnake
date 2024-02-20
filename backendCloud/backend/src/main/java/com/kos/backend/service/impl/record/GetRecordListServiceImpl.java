@@ -24,10 +24,10 @@ public class GetRecordListServiceImpl implements GetRecordListService {
 
     @Override
     public JSONObject getList(Integer page) {
-        IPage<Record> recordIPage = new Page<>(page, 10); // (current, size)
+        IPage<Record> recordIPage = new Page<>(page, 15); // (current, size) size 和前端对应
         QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("id");
-        List<Record> records = recordMapper.selectPage(recordIPage, queryWrapper).getRecords();
+        List<Record> records = recordMapper.selectPage(recordIPage, queryWrapper).getRecords(); // 分页查询
         List<JSONObject> items = new LinkedList<>();
         for (Record record : records) {
             User userA = userMapper.selectById(record.getAId());
