@@ -24,11 +24,11 @@ const store = useStore();
 const handleAvatarSuccess = () => {
 	store.dispatch("getInfo", {
 		success(resp) {
-            console.log("getInfo success: ", resp);
+            console.log("getPhoto success: ", resp);
 			ElMessage.success("更新用户头像");
 		},
 		error(err) {
-			console.log("getInfo err: ", err);
+			console.log("getPhoto err: ", err);
 		},
 	})
 }

@@ -4,8 +4,8 @@ import com.kos.backend.consumer.utils.JwtAuthentication;
 import com.kos.backend.mapper.UserMapper;
 import com.kos.backend.pojo.User;
 import com.kos.backend.service.user.account.RegisterService;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -24,6 +24,8 @@ public class RegisterController {
     @Autowired
     private UserMapper userMapper;
 
+    String resourceDir = System.getProperty("user.dir") + "/backend/src/main/resources";
+
     @PostMapping("/user/account/register/")
     public Map<String, String> register(@RequestParam Map<String, String> map) {
         String username = map.get("username");
@@ -37,19 +39,22 @@ public class RegisterController {
         try {
             System.out.println(file.getOriginalFilename());
             // Save the file to the server
-            Path path = Paths.get("/Users/xyt/MainVault/KingOfSnake/backendCloud/backend/src/main/resources/static/image/" + file.getOriginalFilename());
+            Path path = Paths.get(resourceDir + "/static/image/" + file.getOriginalFilename());
             file.transferTo(path);
 
             // 更新用户 photo
             Integer userId = JwtAuthentication.getUserId(token);
             User user = userMapper.selectById(userId);
-            String serverAddr = "http://192.168.31.157:3000"; // TODO
-            user.setPhoto(serverAddr + "/user/account/avatar/" + file.getOriginalFilename());
+            user.setPhoto("/user/account/avatar/" + file.getOriginalFilename());
             userMapper.updateById(user);
+
+            System.out.println(user.getUsername() + "添加头像至: " + resourceDir + "/static/image/" + file.getOriginalFilename());
 
             // Return the URL of the file
             return "/user/account/avatar/" + file.getOriginalFilename();
         } catch (Exception e) {
+
+            System.out.println("未能添加头像至: " + resourceDir + "/static/image/" + file.getOriginalFilename());
             // Handle the exception
             return "Upload failed";
         }
@@ -58,7 +63,8 @@ public class RegisterController {
     @GetMapping("/user/account/avatar/{filename}")
     public ResponseEntity<Resource> serveAvatar(@PathVariable String filename) {
         try {
-            Path path = Paths.get("/Users/xyt/MainVault/KingOfSnake/backendCloud/backend/src/main/resources/static/image/" + filename);
+
+            Path path = Paths.get(resourceDir + "/static/image/" + filename);
             Resource resource = new UrlResource(path.toUri());
 
             if (resource.exists() || resource.isReadable()) {

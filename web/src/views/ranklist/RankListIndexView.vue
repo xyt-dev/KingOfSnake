@@ -4,7 +4,7 @@
             <el-table :data="users" style="width: 100%; height: 100%;">
                 <el-table-column prop="username" label="玩家" #default="scope">
                     <div style="justify-content: center">
-                        <el-avatar :src="scope.row.photo"/>
+                        <el-avatar :src="getPhotoUrl(scope.row.photo)"/>
                         <span class="user-name">{{scope.row.username}}</span>
                     </div>
                 </el-table-column>
@@ -26,6 +26,15 @@ const store = useStore();
 let currentPage = 1;
 let users = ref([]);
 let usersCount = ref();
+
+
+const getPhotoUrl = (photoUrl) => {
+	if (photoUrl.startsWith("http")) {
+		return photoUrl;
+	} else {
+		return `http://${localStorage.getItem('IpAddr')}:3000${photoUrl}`;
+	}
+}
 
 const handleCurrentChange = page => {
 	pullPage(page);

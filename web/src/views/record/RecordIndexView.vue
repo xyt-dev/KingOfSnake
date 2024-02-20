@@ -5,13 +5,13 @@
                 <el-table-column prop="record.createTime" label="对战时间" />
                 <el-table-column prop="a_username" label="玩家A" #default="scope">
                     <div style="justify-content: center">
-                        <el-avatar :src="scope.row.a_photo"/>
+                        <el-avatar :src="getPhotoUrl(scope.row.a_photo)"/>
                         <span class="user-name">{{scope.row.a_username}}{{ratingVariation(scope.row, 'A')}}</span>
                     </div>
                 </el-table-column>
                 <el-table-column prop="b_username" label="玩家B" #default="scope">
                     <div style="justify-content: center" >
-                        <el-avatar :src="scope.row.b_photo"/>
+                        <el-avatar :src="getPhotoUrl(scope.row.b_photo)"/>
                         <span class="user-name">{{scope.row.b_username}}{{ratingVariation(scope.row, 'B')}}</span>
                     </div>
                 </el-table-column>
@@ -32,6 +32,14 @@ const store = useStore();
 let currentPage = 1;
 let records = ref([]);
 let recordsCount = ref();
+
+const getPhotoUrl = (photoUrl) => {
+	if (photoUrl.startsWith("http")) {
+		return photoUrl;
+	} else {
+		return `http://${localStorage.getItem('IpAddr')}:3000${photoUrl}`;
+	}
+}
 
 const handleCurrentChange = page => {
     pullPage(page);
