@@ -37,7 +37,7 @@ let errorMessage = ref('');
 
 const register = () => {
 	$.ajax({
-        url: "http://127.0.0.1:3000/user/account/register/",
+        url: `http://${localStorage.getItem("IpAddr")}/user/account/register/`,
         type: "post",
         data: {
             username: username.value,

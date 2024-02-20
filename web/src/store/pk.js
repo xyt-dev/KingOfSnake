@@ -28,7 +28,10 @@ export default {
         },
         updateOpponent(state, opponent) {
             state.opponent_username = opponent.username;
-            state.opponent_photo = opponent.photo;
+            if(!opponent.photo.startsWith("/user/account/avatar/"))
+                state.opponent_photo = opponent.photo;
+            else
+                state.opponent_photo = `http://${localStorage.getItem('IpAddr')}:3000${opponent.photo}`;
         },
         updateStatus(state, status) {
             state.status = status;

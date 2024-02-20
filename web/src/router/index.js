@@ -4,7 +4,6 @@ import RankListIndexView from "@/views/ranklist/RankListIndexView.vue";
 import RecordIndexView from "@/views/record/RecordIndexView.vue";
 import NotFound from "@/views/404/NotFound.vue";
 import UserBotIndexView from "@/views/user/bot/UserBotIndexView.vue";
-import HomeView from "@/views/HomeView.vue";
 import UserAccountLoginView from "@/views/user/account/UserAccountLoginView.vue";
 import UserAccountRegisterView from "@/views/user/account/UserAccountRegisterView.vue";
 import store from "@/store";
@@ -13,7 +12,7 @@ const routes = [
   {
     path: '/',
     name: 'HomeView',
-    component: HomeView,
+    component: PkIndexView,
     meta: { // 额外的信息，名字随意
        requestAuth: true,
     }

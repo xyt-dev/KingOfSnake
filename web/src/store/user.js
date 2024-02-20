@@ -15,7 +15,11 @@ export default {
         updateUser(state, user) {
             state.id = user.id;
             state.username = user.username;
-            state.photo = user.photo;
+            if (user.photo.startsWith("http")) {
+                state.photo = user.photo;
+            } else {
+                state.photo = `http://${localStorage.getItem('IpAddr')}:3000${user.photo}`;
+            }
             state.is_login = user.is_login;
         },
         updateToken(state, token) {
