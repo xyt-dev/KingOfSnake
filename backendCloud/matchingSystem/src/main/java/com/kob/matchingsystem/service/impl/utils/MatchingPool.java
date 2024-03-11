@@ -105,7 +105,7 @@ public class MatchingPool extends Thread {
     public void run() {
         while(true) {
             try {
-                Thread.sleep(1000); // 每隔一秒匹配一次 sleep 节省 CPU
+                Thread.sleep(1000); // 每隔一秒匹配一次, sleep 节省 CPU
                 lock.lock();
                 try {
                     increaseWaitingTime();

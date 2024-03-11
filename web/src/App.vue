@@ -13,9 +13,4 @@ import 'element-plus/dist/index.css'
 
 </script>
 <style>
-body {
-  //background-image: url("@/assets/lady.jpg");
-  //background-size: cover;
-  //background-repeat: no-repeat;
-}
 </style>

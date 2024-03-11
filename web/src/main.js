@@ -6,7 +6,7 @@ import ElementPlus from 'element-plus';
 
 createApp(App).use(router).use(store).use(ElementPlus).mount('#app')
 
-localStorage.setItem("IpAddr", "192.168.31.157") // server ip
+localStorage.setItem("IpAddr", "127.0.0.1") // server ip
 
 // 解决奇怪的 ResizeObserver loop completed with undelivered notifications.
 const debounce = (fn, delay) => {

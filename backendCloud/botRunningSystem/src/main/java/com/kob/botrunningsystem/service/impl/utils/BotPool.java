@@ -9,7 +9,7 @@ public class BotPool extends Thread {
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition condition = lock.newCondition();
     private Queue<Bot> bots = new LinkedList<>();
-    private static final long TIMEOUT = 2000; // ms
+    private static final long TIMEOUT = 5000; // ms
 
     public void addBot(Integer userId, String botCode, String input) {
         lock.lock();
@@ -22,7 +22,6 @@ public class BotPool extends Thread {
     }
 
     private void consume(Bot bot) {
-        System.out.println("Consuming Bot: " + bot.getUserId() + "\nBotCode: " + bot.getBotCode() + "\nInput: " + bot.getInput());
         Consumer consumer = new Consumer();
         consumer.startTimeout(TIMEOUT, bot);
         // TODO

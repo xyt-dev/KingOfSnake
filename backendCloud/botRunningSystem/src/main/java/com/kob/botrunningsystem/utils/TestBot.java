@@ -1,7 +1,9 @@
 package com.kob.botrunningsystem.utils;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class TestBot implements com.kob.botrunningsystem.utils.BotInterface {
     static class Cell {
@@ -44,6 +46,35 @@ public class TestBot implements com.kob.botrunningsystem.utils.BotInterface {
         return res;
     }
 
+    Integer countArea(int sx, int sy, int[][] map) {
+        if(map[sx][sy] == 1) return 0;
+        // 广搜求面积
+        int area = 0;
+        int [][] flag = new int[rows][cols];
+        for(int i = 0; i < rows; i ++) {
+            System.arraycopy(map[i], 0, flag[i], 0, cols);
+        }
+        Queue<Cell> q = new LinkedList<>();
+        int[] dx = {-1, 0, 1, 0};
+        int[] dy = {0, 1, 0, -1};
+
+        q.add(new Cell(sx, sy));
+        flag[sx][sy] = 1;
+        while(!q.isEmpty()) {
+            Cell c = q.poll(); // get first element
+            for(int i = 0; i < 4; i ++) {
+                int x = c.x + dx[i];
+                int y = c.y + dy[i];
+                if(flag[x][y] == 0) {
+                    flag[x][y] = 1;
+                    ++ area;
+                    q.add(new Cell(x, y));
+                }
+            }
+        }
+        return area;
+    }
+
     @Override
     public Integer nextMove(String input) {
         String[] strs = input.split("#");
@@ -70,14 +101,28 @@ public class TestBot implements com.kob.botrunningsystem.utils.BotInterface {
         for(Cell c : aCells) map[c.x][c.y] = 1;
         for(Cell c : bCells) map[c.x][c.y] = 1;
 
+        int opponentX = bCells.get(bCells.size() - 1).x;
+        int opponentY = bCells.get(bCells.size() - 1).y;
+        int selfX = aCells.get(aCells.size() - 1).x;
+        int selfY = aCells.get(aCells.size() - 1).y;
+
         int[] dx = {-1, 0, 1, 0};
         int[] dy = {0, 1, 0, -1};
+
+        int maxArea = 0;
+        int direction = 0;
         for (int i = 0; i < 4; ++ i) {
-            int x = aCells.get(aCells.size() - 1).x + dx[i];
-            int y = aCells.get(aCells.size() - 1).y + dy[i];
-            if (x < 0 || x >= rows || y < 0 || y >= cols) continue;
-            if (map[x][y] == 0) return i;
+            int x = selfX + dx[i];
+            int y = selfY + dy[i];
+            int area = countArea(x, y, map);
+            if(area > maxArea) {
+                maxArea = area;
+                direction = i;
+            }
         }
-        return UP;
+
+        return direction;
     }
+
 }
+
